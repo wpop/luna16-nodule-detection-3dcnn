@@ -1,0 +1,21 @@
+# Core scientific stack
+numpy
+pandas
+scipy
+scikit-learn
+
+# Medical image processing
+SimpleITK
+pydicom
+nibabel
+
+# Visualization
+matplotlib
+tqdm
+
+# Config files
+PyYAML
+
+# Development
+pytest
+ruff
