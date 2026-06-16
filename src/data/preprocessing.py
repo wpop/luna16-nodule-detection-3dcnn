@@ -14,14 +14,14 @@ def find_ct_path(
 ) -> Path:
     """
     Find the CT file corresponding to a series UID.
+
+    If duplicate files exist, return the first match.
     """
 
     matches = [path for path in mhd_files if path.stem == series_uid]
 
-    if len(matches) != 1:
-        raise FileNotFoundError(
-            f"Could not uniquely locate CT for {series_uid}"
-        )
+    if not matches:
+        raise FileNotFoundError(f"Could not locate CT for {series_uid}")
 
     return matches[0]
 

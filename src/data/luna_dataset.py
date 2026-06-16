@@ -13,14 +13,14 @@ from src.data.preprocessing import (
     find_ct_path,
     load_ct_volume,
     world_to_voxel,
-    normalize_hu,
 )
 from src.data.patch_extractor import extract_patch
+from src.data.transforms import NormalizeHU, ToTensor3D
 
 
 class LunaDataset(Dataset):
     """
-    PyTorch Dataset that returns normalized 3D CT patches and labels.
+    PyTorch Dataset that returns transformed 3D CT patches and labels.
     """
 
     def __init__(
@@ -28,6 +28,7 @@ class LunaDataset(Dataset):
         candidates_path: Path,
         data_dir: Path,
         patch_size: int = 64,
+        transforms: list | None = None,
     ):
         """
         Initialize the dataset.
@@ -45,6 +46,14 @@ class LunaDataset(Dataset):
 
         self.patch_size = patch_size
 
+        if transforms is None:
+            self.transforms = [
+                NormalizeHU(),
+                ToTensor3D(),
+            ]
+        else:
+            self.transforms = transforms
+
     def __len__(self):
         """
         Return the number of available candidates.
@@ -54,7 +63,7 @@ class LunaDataset(Dataset):
 
     def __getitem__(self, index):
         """
-        Return one normalized 3D patch and its label.
+        Return one transformed 3D patch and its label.
         """
 
         row = self.candidates.iloc[index]
@@ -93,12 +102,9 @@ class LunaDataset(Dataset):
             patch_size=self.patch_size,
         )
 
-        patch = normalize_hu(patch)
+        for transform in self.transforms:
+            patch = transform(patch)
 
-        # Add channel dimension: (D, H, W) -> (1, D, H, W)
-        patch = np.expand_dims(patch, axis=0)
-
-        image = torch.from_numpy(patch).float()
         label = torch.tensor(label, dtype=torch.long)
 
-        return image, label
+        return patch, label
