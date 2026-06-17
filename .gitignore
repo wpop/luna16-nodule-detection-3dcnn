@@ -75,10 +75,10 @@ Thumbs.db
 # Dataset (never upload medical datasets)
 # ==========================================================
 
-data/raw/
-data/interim/
-data/processed/
-data/patches/
+data/raw/*
+data/interim/*
+data/processed/*
+data/patches/*
 
 # Keep directory structure
 !data/raw/.gitkeep
@@ -96,10 +96,10 @@ data/candidates/*.csv
 # Model checkpoints
 # ==========================================================
 
-outputs/checkpoints/
-outputs/results_json/
-outputs/metrics/
-outputs/figures/
+outputs/checkpoints/*
+outputs/results_json/*
+outputs/metrics/*
+outputs/figures/*
 
 # Keep directory structure
 !outputs/checkpoints/.gitkeep
