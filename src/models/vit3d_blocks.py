@@ -93,3 +93,55 @@ class PositionEmbedding3D(nn.Module):
         """
 
         return x + self.position_embedding
+
+
+class TransformerEncoderBlock3D(nn.Module):
+    """
+    Transformer encoder block for 3D patch tokens.
+    """
+
+    def __init__(
+        self,
+        embed_dim: int = 128,
+        num_heads: int = 4,
+        mlp_ratio: int = 4,
+        dropout: float = 0.1,
+    ):
+        """
+        Initialize transformer encoder layers.
+        """
+
+        super().__init__()
+
+        hidden_dim = embed_dim * mlp_ratio
+
+        self.norm1 = nn.LayerNorm(embed_dim)
+        self.attention = nn.MultiheadAttention(
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            dropout=dropout,
+            batch_first=True,
+        )
+        self.norm2 = nn.LayerNorm(embed_dim)
+        self.mlp = nn.Sequential(
+            nn.Linear(embed_dim, hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, embed_dim),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Run transformer encoder block forward pass.
+        """
+
+        attention_input = self.norm1(x)
+        attention_output, _ = self.attention(
+            attention_input,
+            attention_input,
+            attention_input,
+        )
+        x = x + attention_output
+
+        return x + self.mlp(self.norm2(x))

@@ -4,6 +4,7 @@ from src.models.vit3d_blocks import (
     ClassToken,
     PatchEmbedding3D,
     PositionEmbedding3D,
+    TransformerEncoderBlock3D,
 )
 
 
@@ -33,5 +34,14 @@ def test_position_embedding_shape():
     x = torch.randn(2, 65, 128)
 
     output = position_embedding(x)
+
+    assert output.shape == (2, 65, 128)
+
+
+def test_transformer_encoder_block_3d_output_shape():
+    block = TransformerEncoderBlock3D()
+    x = torch.randn(2, 65, 128)
+
+    output = block(x)
 
     assert output.shape == (2, 65, 128)
