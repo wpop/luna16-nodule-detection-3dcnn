@@ -10,9 +10,11 @@ from torch.utils.data import DataLoader, random_split
 
 from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
+from src.engine.checkpoint import CheckpointManager
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
 from src.factories.optimizer_factory import create_optimizer
+from src.factories.scheduler_factory import create_scheduler
 from src.models.baseline_3dcnn import Baseline3DCNN
 
 
@@ -64,7 +66,9 @@ def main() -> None:
 
     model = Baseline3DCNN()
     optimizer = create_optimizer(model, config)
+    scheduler = create_scheduler(optimizer, config)
     loss_fn = nn.CrossEntropyLoss()
+    checkpoint_manager = CheckpointManager(project_root / "outputs" / "checkpoints")
 
     trainer = Trainer(
         model=model,
@@ -89,6 +93,14 @@ def main() -> None:
         max_batches=5,
     )
 
+    checkpoint_path = checkpoint_manager.save_best_model(
+        model=model,
+        validation_loss=val_loss,
+    )
+    scheduler.step()
+
+    current_learning_rate = optimizer.param_groups[0]["lr"]
+
     print("Device:", config.device)
     print("Dataset size:", len(dataset))
     print("Train size:", len(train_dataset))
@@ -97,6 +109,9 @@ def main() -> None:
     print("Train accuracy:", train_accuracy)
     print("Validation loss:", val_loss)
     print("Validation accuracy:", val_accuracy)
+    print("Learning rate:", current_learning_rate)
+    if checkpoint_path is not None:
+        print("Saved checkpoint:", checkpoint_path)
 
 
 if __name__ == "__main__":
