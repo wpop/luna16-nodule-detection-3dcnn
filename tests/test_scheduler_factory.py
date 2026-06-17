@@ -8,7 +8,10 @@ from src.models.baseline_3dcnn import Baseline3DCNN
 
 def test_create_scheduler():
     model = Baseline3DCNN()
-    config = TrainConfig()
+    config = TrainConfig(
+        scheduler_step_size=3,
+        scheduler_gamma=0.25,
+    )
 
     optimizer = create_optimizer(
         model=model,
@@ -21,4 +24,5 @@ def test_create_scheduler():
     )
 
     assert isinstance(scheduler, torch.optim.lr_scheduler.StepLR)
-
+    assert scheduler.step_size == config.scheduler_step_size
+    assert scheduler.gamma == config.scheduler_gamma

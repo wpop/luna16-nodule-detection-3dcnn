@@ -17,7 +17,6 @@ def create_scheduler(
 
     return torch.optim.lr_scheduler.StepLR(
         optimizer,
-        step_size=5,
-        gamma=0.5,
+        step_size=config.scheduler_step_size,
+        gamma=config.scheduler_gamma,
     )
-
