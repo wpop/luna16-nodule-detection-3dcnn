@@ -137,9 +137,13 @@ def main() -> None:
     history_path = history.save_json(
         project_root / "outputs" / "metrics" / "training_history.json"
     )
+    plot_path = history.save_plot(
+        project_root / "outputs" / "figures" / "training_history.png"
+    )
 
     print("Training history:", history.to_dict())
     print("Saved history:", history_path)
+    print("Saved plot:", plot_path)
 
 
 if __name__ == "__main__":

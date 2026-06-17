@@ -44,3 +44,23 @@ def test_training_history_save_json(tmp_path: Path):
 
     assert saved_path == output_path
     assert saved_history == history.to_dict()
+
+
+def test_training_history_save_plot(tmp_path: Path):
+    history = TrainingHistory()
+
+    history.add_epoch(
+        train_loss=0.5,
+        train_accuracy=0.8,
+        val_loss=0.4,
+        val_accuracy=0.9,
+        learning_rate=0.001,
+    )
+
+    output_path = tmp_path / "figures" / "training_history.png"
+
+    saved_path = history.save_plot(output_path)
+
+    assert saved_path == output_path
+    assert saved_path.exists()
+    assert saved_path.stat().st_size > 0

@@ -64,3 +64,26 @@ class TrainingHistory:
             json.dump(self.to_dict(), output_file)
 
         return output_path
+
+    def save_plot(self, output_path: Path) -> Path:
+        """
+        Save history metrics as a plot image.
+        """
+
+        import matplotlib.pyplot as plt
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        epochs = range(1, len(self.train_loss) + 1)
+
+        plt.figure()
+        plt.plot(epochs, self.train_loss, label="train_loss")
+        plt.plot(epochs, self.val_loss, label="val_loss")
+        plt.plot(epochs, self.train_accuracy, label="train_accuracy")
+        plt.plot(epochs, self.val_accuracy, label="val_accuracy")
+        plt.xlabel("Epoch")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(output_path)
+        plt.close()
+
+        return output_path
