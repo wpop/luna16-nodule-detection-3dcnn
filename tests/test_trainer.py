@@ -47,7 +47,9 @@ def test_train_epoch():
         shuffle=False,
     )
 
-    average_loss = trainer.train_epoch(loader)
+    average_loss, average_accuracy = trainer.train_epoch(loader)
 
     assert isinstance(average_loss, float)
+    assert isinstance(average_accuracy, float)
     assert average_loss > 0.0
+    assert 0.0 <= average_accuracy <= 1.0
