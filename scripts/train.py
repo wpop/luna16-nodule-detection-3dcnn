@@ -14,6 +14,7 @@ from src.data.luna_dataset import LunaDataset
 from src.engine.benchmark import BenchmarkResult
 from src.engine.checkpoint import CheckpointManager
 from src.engine.early_stopping import EarlyStopping
+from src.engine.experiment import ExperimentManager
 from src.engine.history import TrainingHistory
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
@@ -60,6 +61,10 @@ def main() -> None:
         num_workers=0,
         device="cuda" if torch.cuda.is_available() else "cpu",
     )
+    experiment = ExperimentManager(
+        project_root=project_root,
+        model_name=config.model_name,
+    )
 
     dataset = LunaDataset(
         candidates_path=candidates_path,
@@ -95,7 +100,7 @@ def main() -> None:
     optimizer = create_optimizer(model, config)
     scheduler = create_scheduler(optimizer, config)
     loss_fn = nn.CrossEntropyLoss()
-    checkpoint_manager = CheckpointManager(project_root / "outputs" / "checkpoints")
+    checkpoint_manager = CheckpointManager(experiment.checkpoint_dir)
     early_stopping = EarlyStopping(
         patience=config.early_stopping_patience,
         min_delta=config.early_stopping_min_delta,
@@ -162,12 +167,8 @@ def main() -> None:
             print("Early stopping triggered.")
             break
 
-    history_path = history.save_json(
-        project_root / "outputs" / "metrics" / "training_history.json"
-    )
-    plot_path = history.save_plot(
-        project_root / "outputs" / "figures" / "training_history.png"
-    )
+    history_path = history.save_json(experiment.metrics_dir / "training_history.json")
+    plot_path = history.save_plot(experiment.figures_dir / "training_history.png")
     benchmark_result = BenchmarkResult(
         model_name=config.model_name,
         total_parameters=total_parameters,
@@ -179,12 +180,10 @@ def main() -> None:
         learning_rate=history.learning_rate[-1],
     )
     benchmark_path = benchmark_result.save_json(
-        project_root
-        / "outputs"
-        / "results_json"
-        / f"{config.model_name}_benchmark.json"
+        experiment.results_dir / "benchmark.json"
     )
 
+    print("Experiment directory:", experiment.experiment_dir)
     print("Training history:", history.to_dict())
     print("Saved history:", history_path)
     print("Saved plot:", plot_path)
