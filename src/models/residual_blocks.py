@@ -28,6 +28,7 @@ class ResidualBlock3D(nn.Module):
             kernel_size=3,
             padding=1,
         )
+        self.bn1 = nn.BatchNorm3d(out_channels)
         self.relu = nn.ReLU()
         self.conv2 = nn.Conv3d(
             out_channels,
@@ -35,6 +36,7 @@ class ResidualBlock3D(nn.Module):
             kernel_size=3,
             padding=1,
         )
+        self.bn2 = nn.BatchNorm3d(out_channels)
 
         if in_channels != out_channels:
             self.skip = nn.Conv3d(
@@ -53,8 +55,10 @@ class ResidualBlock3D(nn.Module):
         residual = self.skip(x)
 
         x = self.conv1(x)
+        x = self.bn1(x)
         x = self.relu(x)
         x = self.conv2(x)
+        x = self.bn2(x)
         x = x + residual
 
         return self.relu(x)
