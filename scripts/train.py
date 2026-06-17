@@ -19,6 +19,10 @@ from src.engine.validator import Validator
 from src.factories.model_factory import create_model
 from src.factories.optimizer_factory import create_optimizer
 from src.factories.scheduler_factory import create_scheduler
+from src.models.model_summary import (
+    count_parameters,
+    count_trainable_parameters,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,6 +89,8 @@ def main() -> None:
     )
 
     model = create_model(config)
+    total_parameters = count_parameters(model)
+    trainable_parameters = count_trainable_parameters(model)
     optimizer = create_optimizer(model, config)
     scheduler = create_scheduler(optimizer, config)
     loss_fn = nn.CrossEntropyLoss()
@@ -110,6 +116,8 @@ def main() -> None:
 
     print("Device:", config.device)
     print("Model:", config.model_name)
+    print("Total parameters:", total_parameters)
+    print("Trainable parameters:", trainable_parameters)
     print("Dataset size:", len(dataset))
     print("Train size:", len(train_dataset))
     print("Validation size:", len(val_dataset))
