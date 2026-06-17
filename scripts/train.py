@@ -12,6 +12,7 @@ from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
 from src.engine.checkpoint import CheckpointManager
 from src.engine.early_stopping import EarlyStopping
+from src.engine.history import TrainingHistory
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
 from src.factories.optimizer_factory import create_optimizer
@@ -74,6 +75,7 @@ def main() -> None:
         patience=config.early_stopping_patience,
         min_delta=config.early_stopping_min_delta,
     )
+    history = TrainingHistory()
 
     trainer = Trainer(
         model=model,
@@ -111,6 +113,13 @@ def main() -> None:
         scheduler.step()
 
         current_learning_rate = optimizer.param_groups[0]["lr"]
+        history.add_epoch(
+            train_loss=train_loss,
+            train_accuracy=train_accuracy,
+            val_loss=val_loss,
+            val_accuracy=val_accuracy,
+            learning_rate=current_learning_rate,
+        )
 
         print("Epoch:", epoch + 1)
         print("Train loss:", train_loss)
@@ -124,6 +133,8 @@ def main() -> None:
         if early_stopping.should_stop(val_loss):
             print("Early stopping triggered.")
             break
+
+    print("Training history:", history.to_dict())
 
 
 if __name__ == "__main__":
