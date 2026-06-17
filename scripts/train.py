@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, random_split
 from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
 from src.engine.checkpoint import CheckpointManager
+from src.engine.early_stopping import EarlyStopping
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
 from src.factories.optimizer_factory import create_optimizer
@@ -69,6 +70,10 @@ def main() -> None:
     scheduler = create_scheduler(optimizer, config)
     loss_fn = nn.CrossEntropyLoss()
     checkpoint_manager = CheckpointManager(project_root / "outputs" / "checkpoints")
+    early_stopping = EarlyStopping(
+        patience=config.early_stopping_patience,
+        min_delta=config.early_stopping_min_delta,
+    )
 
     trainer = Trainer(
         model=model,
@@ -83,35 +88,42 @@ def main() -> None:
         config=config,
     )
 
-    train_loss, train_accuracy = trainer.train_epoch(
-        train_loader,
-        max_batches=5,
-    )
-
-    val_loss, val_accuracy = validator.validate_epoch(
-        val_loader,
-        max_batches=5,
-    )
-
-    checkpoint_path = checkpoint_manager.save_best_model(
-        model=model,
-        validation_loss=val_loss,
-    )
-    scheduler.step()
-
-    current_learning_rate = optimizer.param_groups[0]["lr"]
-
     print("Device:", config.device)
     print("Dataset size:", len(dataset))
     print("Train size:", len(train_dataset))
     print("Validation size:", len(val_dataset))
-    print("Train loss:", train_loss)
-    print("Train accuracy:", train_accuracy)
-    print("Validation loss:", val_loss)
-    print("Validation accuracy:", val_accuracy)
-    print("Learning rate:", current_learning_rate)
-    if checkpoint_path is not None:
-        print("Saved checkpoint:", checkpoint_path)
+
+    for epoch in range(config.num_epochs):
+        train_loss, train_accuracy = trainer.train_epoch(
+            train_loader,
+            max_batches=5,
+        )
+
+        val_loss, val_accuracy = validator.validate_epoch(
+            val_loader,
+            max_batches=5,
+        )
+
+        checkpoint_path = checkpoint_manager.save_best_model(
+            model=model,
+            validation_loss=val_loss,
+        )
+        scheduler.step()
+
+        current_learning_rate = optimizer.param_groups[0]["lr"]
+
+        print("Epoch:", epoch + 1)
+        print("Train loss:", train_loss)
+        print("Train accuracy:", train_accuracy)
+        print("Validation loss:", val_loss)
+        print("Validation accuracy:", val_accuracy)
+        print("Learning rate:", current_learning_rate)
+        if checkpoint_path is not None:
+            print("Saved checkpoint:", checkpoint_path)
+
+        if early_stopping.should_stop(val_loss):
+            print("Early stopping triggered.")
+            break
 
 
 if __name__ == "__main__":
