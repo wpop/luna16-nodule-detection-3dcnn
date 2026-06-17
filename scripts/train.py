@@ -2,6 +2,7 @@
 Minimal training entry point for the LUNA16 baseline 3D CNN.
 """
 
+import argparse
 from pathlib import Path
 
 import torch
@@ -20,17 +21,34 @@ from src.factories.optimizer_factory import create_optimizer
 from src.factories.scheduler_factory import create_scheduler
 
 
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments.
+    """
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--model",
+        choices=("baseline", "residual"),
+        default="baseline",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> None:
     """
     Run one debug training and validation epoch.
     """
 
+    args = parse_args()
     project_root = Path(__file__).resolve().parents[1]
 
     data_dir = project_root / "data" / "raw" / "LUNA16"
     candidates_path = data_dir / "data-unversioned" / "part2" / "luna" / "candidates.csv"
 
     config = TrainConfig(
+        model_name=args.model,
         batch_size=4,
         learning_rate=1e-3,
         num_epochs=1,
@@ -91,6 +109,7 @@ def main() -> None:
     )
 
     print("Device:", config.device)
+    print("Model:", config.model_name)
     print("Dataset size:", len(dataset))
     print("Train size:", len(train_dataset))
     print("Validation size:", len(val_dataset))
