@@ -2,6 +2,9 @@
 Training history utility for epoch metrics.
 """
 
+import json
+from pathlib import Path
+
 
 class TrainingHistory:
     """
@@ -49,3 +52,15 @@ class TrainingHistory:
             "val_accuracy": self.val_accuracy,
             "learning_rate": self.learning_rate,
         }
+
+    def save_json(self, output_path: Path) -> Path:
+        """
+        Save history as a JSON file.
+        """
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with output_path.open("w", encoding="utf-8") as output_file:
+            json.dump(self.to_dict(), output_file)
+
+        return output_path

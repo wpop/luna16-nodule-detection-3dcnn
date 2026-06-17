@@ -134,7 +134,12 @@ def main() -> None:
             print("Early stopping triggered.")
             break
 
+    history_path = history.save_json(
+        project_root / "outputs" / "metrics" / "training_history.json"
+    )
+
     print("Training history:", history.to_dict())
+    print("Saved history:", history_path)
 
 
 if __name__ == "__main__":
