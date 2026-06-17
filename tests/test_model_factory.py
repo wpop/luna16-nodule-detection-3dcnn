@@ -7,6 +7,7 @@ from src.models.multiscale_3dcnn import MultiScale3DCNN
 from src.models.multiscale_se_3dcnn import MultiScaleSE3DCNN
 from src.models.residual_3dcnn import Residual3DCNN
 from src.models.residual_se_3dcnn import ResidualSE3DCNN
+from src.models.vit3d import VisionTransformer3D
 
 
 def test_create_baseline_model():
@@ -47,6 +48,14 @@ def test_create_multiscale_se_model():
     model = create_model(config)
 
     assert isinstance(model, MultiScaleSE3DCNN)
+
+
+def test_create_vit3d_model():
+    config = TrainConfig(model_name="vit3d")
+
+    model = create_model(config)
+
+    assert isinstance(model, VisionTransformer3D)
 
 
 def test_create_unknown_model_raises_value_error():

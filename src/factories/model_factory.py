@@ -10,6 +10,7 @@ from src.models.multiscale_3dcnn import MultiScale3DCNN
 from src.models.multiscale_se_3dcnn import MultiScaleSE3DCNN
 from src.models.residual_3dcnn import Residual3DCNN
 from src.models.residual_se_3dcnn import ResidualSE3DCNN
+from src.models.vit3d import VisionTransformer3D
 
 
 def create_model(config: TrainConfig) -> nn.Module:
@@ -31,5 +32,8 @@ def create_model(config: TrainConfig) -> nn.Module:
 
     if config.model_name == "multiscale_se":
         return MultiScaleSE3DCNN()
+
+    if config.model_name == "vit3d":
+        return VisionTransformer3D()
 
     raise ValueError(f"Unknown model name: {config.model_name}")

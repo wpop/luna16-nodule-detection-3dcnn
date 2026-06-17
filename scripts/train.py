@@ -41,6 +41,7 @@ def parse_args() -> argparse.Namespace:
             "residual_se",
             "multiscale",
             "multiscale_se",
+            "vit3d",
         ),
         default="baseline",
     )
