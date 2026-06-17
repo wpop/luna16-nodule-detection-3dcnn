@@ -17,7 +17,7 @@ from src.models.baseline_3dcnn import Baseline3DCNN
 
 def main() -> None:
     """
-    Run one training step to validate the full pipeline.
+    Run one training epoch to validate the full pipeline.
     """
 
     project_root = Path(__file__).resolve().parents[1]
@@ -57,18 +57,16 @@ def main() -> None:
         config=config,
     )
 
-    images, labels = next(iter(loader))
-
-    loss = trainer.train_step(
-        images=images,
-        labels=labels,
+    average_loss = trainer.train_epoch(
+        loader,
+        max_batches=5,
     )
 
-    print("Batch images:", images.shape)
-    print("Batch labels:", labels.shape)
-    print("Loss:", loss)
+    print("Device:", config.device)
+    print("Dataset size:", len(dataset))
+    print("Number of batches:", len(loader))
+    print("Average epoch loss:", average_loss)
 
 
 if __name__ == "__main__":
     main()
-
