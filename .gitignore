@@ -107,6 +107,10 @@ outputs/figures/*
 !outputs/metrics/.gitkeep
 !outputs/figures/.gitkeep
 
+# Experiment outputs
+outputs/experiments/*
+!outputs/experiments/.gitkeep
+
 # ==========================================================
 # Temporary files
 # ==========================================================
