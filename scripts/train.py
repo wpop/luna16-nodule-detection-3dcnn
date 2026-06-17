@@ -35,7 +35,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--model",
-        choices=("baseline", "residual", "multiscale"),
+        choices=(
+            "baseline",
+            "residual",
+            "residual_se",
+            "multiscale",
+            "multiscale_se",
+        ),
         default="baseline",
     )
 
