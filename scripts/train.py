@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, random_split
 
 from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
+from src.engine.benchmark import BenchmarkResult
 from src.engine.checkpoint import CheckpointManager
 from src.engine.early_stopping import EarlyStopping
 from src.engine.history import TrainingHistory
@@ -167,10 +168,27 @@ def main() -> None:
     plot_path = history.save_plot(
         project_root / "outputs" / "figures" / "training_history.png"
     )
+    benchmark_result = BenchmarkResult(
+        model_name=config.model_name,
+        total_parameters=total_parameters,
+        trainable_parameters=trainable_parameters,
+        train_loss=history.train_loss[-1],
+        val_loss=history.val_loss[-1],
+        train_accuracy=history.train_accuracy[-1],
+        val_accuracy=history.val_accuracy[-1],
+        learning_rate=history.learning_rate[-1],
+    )
+    benchmark_path = benchmark_result.save_json(
+        project_root
+        / "outputs"
+        / "results_json"
+        / f"{config.model_name}_benchmark.json"
+    )
 
     print("Training history:", history.to_dict())
     print("Saved history:", history_path)
     print("Saved plot:", plot_path)
+    print("Saved benchmark:", benchmark_path)
 
 
 if __name__ == "__main__":
