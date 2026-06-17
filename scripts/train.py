@@ -6,18 +6,19 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
 from src.engine.trainer import Trainer
+from src.engine.validator import Validator
 from src.factories.optimizer_factory import create_optimizer
 from src.models.baseline_3dcnn import Baseline3DCNN
 
 
 def main() -> None:
     """
-    Run one training epoch to validate the full pipeline.
+    Run one debug training and validation epoch.
     """
 
     project_root = Path(__file__).resolve().parents[1]
@@ -39,10 +40,25 @@ def main() -> None:
         patch_size=64,
     )
 
-    loader = DataLoader(
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+
+    train_dataset, val_dataset = random_split(
         dataset,
+        [train_size, val_size],
+    )
+
+    train_loader = DataLoader(
+        train_dataset,
         batch_size=config.batch_size,
         shuffle=True,
+        num_workers=config.num_workers,
+    )
+
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
         num_workers=config.num_workers,
     )
 
@@ -57,15 +73,30 @@ def main() -> None:
         config=config,
     )
 
-    average_loss = trainer.train_epoch(
-        loader,
+    validator = Validator(
+        model=model,
+        loss_fn=loss_fn,
+        config=config,
+    )
+
+    train_loss, train_accuracy = trainer.train_epoch(
+        train_loader,
+        max_batches=5,
+    )
+
+    val_loss, val_accuracy = validator.validate_epoch(
+        val_loader,
         max_batches=5,
     )
 
     print("Device:", config.device)
     print("Dataset size:", len(dataset))
-    print("Number of batches:", len(loader))
-    print("Average epoch loss:", average_loss)
+    print("Train size:", len(train_dataset))
+    print("Validation size:", len(val_dataset))
+    print("Train loss:", train_loss)
+    print("Train accuracy:", train_accuracy)
+    print("Validation loss:", val_loss)
+    print("Validation accuracy:", val_accuracy)
 
 
 if __name__ == "__main__":
