@@ -11,6 +11,7 @@ class TrainConfig:
     Stores training hyperparameters.
     """
 
+    model_name: str = "baseline"
     batch_size: int = 8
     learning_rate: float = 1e-3
     scheduler_step_size: int = 5

@@ -15,9 +15,9 @@ from src.engine.early_stopping import EarlyStopping
 from src.engine.history import TrainingHistory
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
+from src.factories.model_factory import create_model
 from src.factories.optimizer_factory import create_optimizer
 from src.factories.scheduler_factory import create_scheduler
-from src.models.baseline_3dcnn import Baseline3DCNN
 
 
 def main() -> None:
@@ -66,7 +66,7 @@ def main() -> None:
         num_workers=config.num_workers,
     )
 
-    model = Baseline3DCNN()
+    model = create_model(config)
     optimizer = create_optimizer(model, config)
     scheduler = create_scheduler(optimizer, config)
     loss_fn = nn.CrossEntropyLoss()

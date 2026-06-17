@@ -1,0 +1,23 @@
+"""
+Factory for creating model instances.
+"""
+
+import torch.nn as nn
+
+from src.config.train_config import TrainConfig
+from src.models.baseline_3dcnn import Baseline3DCNN
+from src.models.residual_3dcnn import Residual3DCNN
+
+
+def create_model(config: TrainConfig) -> nn.Module:
+    """
+    Create model from training configuration.
+    """
+
+    if config.model_name == "baseline":
+        return Baseline3DCNN()
+
+    if config.model_name == "residual":
+        return Residual3DCNN()
+
+    raise ValueError(f"Unknown model name: {config.model_name}")
