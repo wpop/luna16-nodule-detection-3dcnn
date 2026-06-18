@@ -18,6 +18,7 @@ def test_benchmark_result_save_json(tmp_path: Path):
         recall=0.6,
         specificity=0.95,
         f1_score=0.64,
+        auc=0.75,
     )
     output_path = tmp_path / "results_json" / "baseline_benchmark.json"
 

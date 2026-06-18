@@ -2,6 +2,8 @@
 ROC curve and AUC utilities.
 """
 
+from pathlib import Path
+
 import torch
 
 
@@ -62,3 +64,36 @@ def compute_auc(
         auc += width * height
 
     return auc
+
+
+def save_roc_curve_plot(
+    false_positive_rates: list[float],
+    true_positive_rates: list[float],
+    auc: float,
+    output_path: Path,
+) -> Path:
+    """
+    Save a ROC curve as a PNG figure.
+    """
+
+    import matplotlib.pyplot as plt
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    figure, axes = plt.subplots()
+    axes.plot(
+        false_positive_rates,
+        true_positive_rates,
+        label=f"AUC = {auc:.3f}",
+    )
+    axes.plot([0.0, 1.0], [0.0, 1.0], linestyle="--", label="Random classifier")
+    axes.set_xlabel("False Positive Rate")
+    axes.set_ylabel("True Positive Rate")
+    axes.set_title("ROC Curve")
+    axes.legend()
+    axes.grid(True)
+    figure.tight_layout()
+    figure.savefig(output_path)
+    plt.close(figure)
+
+    return output_path

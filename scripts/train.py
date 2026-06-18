@@ -23,6 +23,7 @@ from src.engine.confusion_matrix import (
 from src.engine.early_stopping import EarlyStopping
 from src.engine.experiment import ExperimentManager
 from src.engine.history import TrainingHistory
+from src.engine.roc_auc import compute_auc, compute_roc_curve, save_roc_curve_plot
 from src.engine.trainer import Trainer
 from src.engine.validator import Validator
 from src.factories.model_factory import create_model
@@ -211,6 +212,17 @@ def main() -> None:
         confusion_matrix,
         experiment.figures_dir / "confusion_matrix.png",
     )
+    roc_curve = compute_roc_curve(validation_labels, validation_probabilities)
+    auc = compute_auc(
+        roc_curve["false_positive_rates"],
+        roc_curve["true_positive_rates"],
+    )
+    roc_curve_path = save_roc_curve_plot(
+        roc_curve["false_positive_rates"],
+        roc_curve["true_positive_rates"],
+        auc,
+        experiment.figures_dir / "roc_curve.png",
+    )
     plot_path = history.save_plot(experiment.figures_dir / "training_history.png")
     benchmark_result = BenchmarkResult(
         model_name=config.model_name,
@@ -225,6 +237,7 @@ def main() -> None:
         recall=classification_metrics["recall"],
         specificity=classification_metrics["specificity"],
         f1_score=classification_metrics["f1_score"],
+        auc=auc,
     )
     benchmark_path = benchmark_result.save_json(
         experiment.results_dir / "benchmark.json"
@@ -237,6 +250,8 @@ def main() -> None:
     print("Classification metrics:", classification_metrics)
     print("Saved classification metrics:", classification_metrics_path)
     print("Saved confusion matrix plot:", confusion_matrix_plot_path)
+    print("AUC:", auc)
+    print("Saved ROC curve:", roc_curve_path)
     print("Saved plot:", plot_path)
     print("Saved benchmark:", benchmark_path)
     print("TensorBoard log directory:", tensorboard_log_dir)

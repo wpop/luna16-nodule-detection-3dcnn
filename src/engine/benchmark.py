@@ -25,6 +25,7 @@ class BenchmarkResult:
     recall: float
     specificity: float
     f1_score: float
+    auc: float
 
     def to_dict(self) -> dict[str, str | int | float]:
         """
