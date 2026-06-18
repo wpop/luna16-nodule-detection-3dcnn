@@ -3,6 +3,7 @@ Minimal training entry point for the LUNA16 baseline 3D CNN.
 """
 
 import argparse
+import json
 from pathlib import Path
 
 import torch
@@ -15,6 +16,7 @@ from src.data.luna_dataset import LunaDataset
 from src.engine.benchmark import BenchmarkResult
 from src.engine.checkpoint import CheckpointManager
 from src.engine.confusion_matrix import (
+    compute_binary_metrics,
     save_confusion_matrix_json,
     save_confusion_matrix_plot,
 )
@@ -193,6 +195,12 @@ def main() -> None:
         confusion_matrix,
         experiment.metrics_dir / "confusion_matrix.json",
     )
+    classification_metrics = compute_binary_metrics(confusion_matrix)
+    classification_metrics_path = experiment.metrics_dir / "classification_metrics.json"
+
+    with classification_metrics_path.open("w", encoding="utf-8") as output_file:
+        json.dump(classification_metrics, output_file)
+
     confusion_matrix_plot_path = save_confusion_matrix_plot(
         confusion_matrix,
         experiment.figures_dir / "confusion_matrix.png",
@@ -216,6 +224,8 @@ def main() -> None:
     print("Training history:", history.to_dict())
     print("Saved history:", history_path)
     print("Saved confusion matrix:", confusion_matrix_path)
+    print("Classification metrics:", classification_metrics)
+    print("Saved classification metrics:", classification_metrics_path)
     print("Saved confusion matrix plot:", confusion_matrix_plot_path)
     print("Saved plot:", plot_path)
     print("Saved benchmark:", benchmark_path)
