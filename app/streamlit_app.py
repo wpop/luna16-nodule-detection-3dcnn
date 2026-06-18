@@ -2,6 +2,7 @@
 Streamlit demo app for single 3D patch inference.
 """
 
+import json
 import time
 from pathlib import Path
 
@@ -109,27 +110,46 @@ def load_selected_patch(
     return np.load(EXAMPLE_PATCH_PATHS[patch_source])
 
 
-def main() -> None:
+def find_latest_experiment(project_root: Path) -> Path | None:
     """
-    Run the Streamlit app.
+    Return the latest experiment directory if one exists.
     """
 
-    st.set_page_config(page_title="LUNA16 Lung Nodule Classification", layout="centered")
-    st.title("LUNA16 Lung Nodule Classification")
-    st.caption(
-        "Research demo for 3D CNN and Vision Transformer inference on LUNA16 patches."
-    )
+    experiments_dir = project_root / "outputs" / "experiments"
 
-    model_name = st.sidebar.selectbox("Model", MODEL_NAMES)
-    checkpoint_path_text = st.sidebar.text_input(
-        "Checkpoint path",
-        "outputs/experiments/20260618_103653_baseline/checkpoints/best_model.pth",
-    )
-    checkpoint_path = Path(checkpoint_path_text)
-    st.sidebar.markdown("### Run configuration")
-    st.sidebar.write("Model:", model_name)
-    st.sidebar.write("Checkpoint:", checkpoint_path.name)
-    st.sidebar.write("Device:", "CPU")
+    if not experiments_dir.exists():
+        return None
+
+    experiment_dirs = [
+        path
+        for path in experiments_dir.iterdir()
+        if path.is_dir()
+    ]
+
+    if not experiment_dirs:
+        return None
+
+    return max(experiment_dirs, key=lambda path: path.name)
+
+
+def training_history_epoch_count(history_path: Path) -> int:
+    """
+    Return the number of epochs stored in a training history JSON file.
+    """
+
+    with history_path.open("r", encoding="utf-8") as input_file:
+        history = json.load(input_file)
+
+    return len(history.get("train_loss", []))
+
+
+def render_prediction_tab(
+    model_name: str,
+    checkpoint_path: Path,
+) -> None:
+    """
+    Render the single-patch prediction interface.
+    """
 
     patch_source = st.selectbox("Patch source", PATCH_SOURCES)
     uploaded_file = None
@@ -139,20 +159,17 @@ def main() -> None:
 
     if patch_source == "Upload custom .npy patch" and uploaded_file is None:
         st.info("Upload a 3D NumPy patch to begin.")
-        st.caption("This demo is intended for research purposes only.")
         return
 
     try:
         patch = load_selected_patch(patch_source, uploaded_file)
         if patch is None:
             st.info("Upload a 3D NumPy patch to begin.")
-            st.caption("This demo is intended for research purposes only.")
             return
 
         padded_patch = pad_patch(patch)
     except Exception as error:
         st.error(str(error))
-        st.caption("This demo is intended for research purposes only.")
         return
 
     with st.expander("Patch Information", expanded=False):
@@ -180,7 +197,6 @@ def main() -> None:
                 inference_time_ms = (time.perf_counter() - start_time) * 1000.0
             except Exception as error:
                 st.error(str(error))
-                st.caption("This demo is intended for research purposes only.")
                 return
 
             if prediction["predicted_class"] == 0:
@@ -199,6 +215,99 @@ def main() -> None:
                 st.json(prediction)
         else:
             st.info("Run prediction to view results.")
+
+
+def render_evaluation_tab(project_root: Path) -> None:
+    """
+    Render evaluation artifacts from the latest experiment.
+    """
+
+    latest_experiment = find_latest_experiment(project_root)
+
+    if latest_experiment is None:
+        st.info("No evaluation results available.")
+        return
+
+    st.write("Latest experiment:", latest_experiment.name)
+
+    displayed_any = False
+
+    for figure_path in [
+        latest_experiment / "figures" / "confusion_matrix.png",
+        latest_experiment / "figures" / "roc_curve.png",
+    ]:
+        if figure_path.exists():
+            st.image(str(figure_path), caption=figure_path.name)
+            displayed_any = True
+
+    history_path = latest_experiment / "metrics" / "training_history.json"
+    history_figure_path = latest_experiment / "figures" / "training_history.png"
+
+    if history_path.exists():
+        epoch_count = training_history_epoch_count(history_path)
+
+        if epoch_count > 1 and history_figure_path.exists():
+            st.image(str(history_figure_path), caption=history_figure_path.name)
+            displayed_any = True
+        elif epoch_count == 1:
+            st.info(
+                "Training history plot is skipped because this run contains only one epoch."
+            )
+            displayed_any = True
+
+    if not displayed_any:
+        st.info("No evaluation results available.")
+
+
+def render_about_tab() -> None:
+    """
+    Render project summary information.
+    """
+
+    st.write("This is a research demo for LUNA16 lung nodule classification.")
+    st.write("It supports 3D CNNs and a 3D Vision Transformer.")
+    st.write(
+        "It includes training, validation, benchmark export, TensorBoard, ROC/AUC, "
+        "confusion matrix, ONNX export, and inference."
+    )
+
+
+def main() -> None:
+    """
+    Run the Streamlit app.
+    """
+
+    project_root = Path(__file__).resolve().parents[1]
+
+    st.set_page_config(page_title="LUNA16 Lung Nodule Classification", layout="centered")
+    st.title("LUNA16 Lung Nodule Classification")
+    st.caption(
+        "Research demo for 3D CNN and Vision Transformer inference on LUNA16 patches."
+    )
+
+    model_name = st.sidebar.selectbox("Model", MODEL_NAMES)
+    checkpoint_path_text = st.sidebar.text_input(
+        "Checkpoint path",
+        "outputs/experiments/20260618_103653_baseline/checkpoints/best_model.pth",
+    )
+    checkpoint_path = Path(checkpoint_path_text)
+    st.sidebar.markdown("### Run configuration")
+    st.sidebar.write("Model:", model_name)
+    st.sidebar.write("Checkpoint:", checkpoint_path.name)
+    st.sidebar.write("Device:", "CPU")
+
+    prediction_tab, evaluation_tab, about_tab = st.tabs(
+        ["Prediction", "Evaluation", "About"]
+    )
+
+    with prediction_tab:
+        render_prediction_tab(model_name, checkpoint_path)
+
+    with evaluation_tab:
+        render_evaluation_tab(project_root)
+
+    with about_tab:
+        render_about_tab()
 
     st.caption("This demo is intended for research purposes only.")
 
