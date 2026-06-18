@@ -117,6 +117,9 @@ outputs/benchmark_summary.md
 outputs/model_comparison.csv
 outputs/model_comparison.md
 
+# Generated prediction outputs
+outputs/predictions/
+
 # ==========================================================
 # Temporary files
 # ==========================================================
