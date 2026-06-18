@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from src.config.train_config import TrainConfig
-from src.engine.metrics import accuracy_from_logits
+from src.engine.metrics import accuracy_from_logits, confusion_matrix_from_logits
 
 
 class Validator:
@@ -35,7 +35,7 @@ class Validator:
         self,
         loader: DataLoader,
         max_batches: int | None = None,
-    ) -> tuple[float, float]:
+    ) -> tuple[float, float, torch.Tensor]:
         """
         Validate model for one epoch without gradient updates.
         """
@@ -44,6 +44,7 @@ class Validator:
 
         total_loss = 0.0
         total_accuracy = 0.0
+        confusion_matrix = torch.zeros((2, 2), dtype=torch.long, device=self.device)
         num_batches = 0
 
         with torch.no_grad():
@@ -57,13 +58,14 @@ class Validator:
                 logits = self.model(images)
                 loss = self.loss_fn(logits, labels)
                 accuracy = accuracy_from_logits(logits, labels)
+                batch_confusion_matrix = confusion_matrix_from_logits(logits, labels)
 
                 total_loss += float(loss.item())
                 total_accuracy += accuracy
+                confusion_matrix += batch_confusion_matrix
                 num_batches += 1
 
         average_loss = total_loss / num_batches
         average_accuracy = total_accuracy / num_batches
 
-        return average_loss, average_accuracy
-
+        return average_loss, average_accuracy, confusion_matrix
