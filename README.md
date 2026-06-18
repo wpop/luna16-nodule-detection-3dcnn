@@ -60,6 +60,30 @@ outputs/experiments/<timestamp>_<model>/
 These directories contain the best checkpoint, training history JSON, training
 history plot, and benchmark JSON for the run.
 
+## TensorBoard
+
+Every experiment automatically writes TensorBoard logs into:
+
+```text
+outputs/experiments/<timestamp>_<model>/tensorboard/
+```
+
+View all experiment logs with:
+
+```bash
+tensorboard --logdir outputs/experiments
+```
+
+TensorBoard provides interactive visualization of:
+
+- Training loss
+- Validation loss
+- Training accuracy
+- Validation accuracy
+- Learning rate
+
+Open the URL displayed by TensorBoard (typically http://localhost:6006) in your web browser.
+
 ## Benchmark Summary
 
 Summarize saved experiment benchmark JSON files with:
