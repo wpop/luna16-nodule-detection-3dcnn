@@ -11,6 +11,7 @@ nibabel
 
 # Visualization
 matplotlib
+streamlit
 tqdm
 
 # Config files
