@@ -150,7 +150,13 @@ def main() -> None:
             max_batches=5,
         )
 
-        val_loss, val_accuracy, confusion_matrix = validator.validate_epoch(
+        (
+            val_loss,
+            val_accuracy,
+            confusion_matrix,
+            validation_labels,
+            validation_probabilities,
+        ) = validator.validate_epoch(
             val_loader,
             max_batches=5,
         )

@@ -29,7 +29,13 @@ def test_validate_epoch():
         shuffle=False,
     )
 
-    average_loss, average_accuracy, confusion_matrix = validator.validate_epoch(loader)
+    (
+        average_loss,
+        average_accuracy,
+        confusion_matrix,
+        all_labels,
+        all_probabilities,
+    ) = validator.validate_epoch(loader)
 
     assert isinstance(average_loss, float)
     assert isinstance(average_accuracy, float)
@@ -38,3 +44,7 @@ def test_validate_epoch():
     assert confusion_matrix.shape == (2, 2)
     assert confusion_matrix.dtype == torch.long
     assert confusion_matrix.sum().item() == len(dataset)
+    assert torch.equal(all_labels, labels)
+    assert all_probabilities.shape == (len(dataset),)
+    assert all_probabilities.dtype == torch.float32
+    assert torch.all((0.0 <= all_probabilities) & (all_probabilities <= 1.0))

@@ -35,7 +35,7 @@ class Validator:
         self,
         loader: DataLoader,
         max_batches: int | None = None,
-    ) -> tuple[float, float, torch.Tensor]:
+    ) -> tuple[float, float, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Validate model for one epoch without gradient updates.
         """
@@ -45,6 +45,8 @@ class Validator:
         total_loss = 0.0
         total_accuracy = 0.0
         confusion_matrix = torch.zeros((2, 2), dtype=torch.long, device=self.device)
+        all_labels = []
+        all_probabilities = []
         num_batches = 0
 
         with torch.no_grad():
@@ -59,13 +61,24 @@ class Validator:
                 loss = self.loss_fn(logits, labels)
                 accuracy = accuracy_from_logits(logits, labels)
                 batch_confusion_matrix = confusion_matrix_from_logits(logits, labels)
+                probabilities = torch.softmax(logits, dim=1)[:, 1]
 
                 total_loss += float(loss.item())
                 total_accuracy += accuracy
                 confusion_matrix += batch_confusion_matrix
+                all_labels.append(labels.detach().cpu())
+                all_probabilities.append(probabilities.detach().cpu())
                 num_batches += 1
 
         average_loss = total_loss / num_batches
         average_accuracy = total_accuracy / num_batches
+        all_labels_tensor = torch.cat(all_labels)
+        all_probabilities_tensor = torch.cat(all_probabilities)
 
-        return average_loss, average_accuracy, confusion_matrix
+        return (
+            average_loss,
+            average_accuracy,
+            confusion_matrix,
+            all_labels_tensor,
+            all_probabilities_tensor,
+        )
