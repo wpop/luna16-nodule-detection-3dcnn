@@ -114,6 +114,9 @@ outputs/experiments/*
 outputs/benchmark_summary.csv
 outputs/benchmark_summary.md
 
+outputs/model_comparison.csv
+outputs/model_comparison.md
+
 # ==========================================================
 # Temporary files
 # ==========================================================
