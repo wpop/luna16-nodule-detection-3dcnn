@@ -8,6 +8,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
+from torch.utils.tensorboard import SummaryWriter
 
 from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
@@ -72,6 +73,8 @@ def main() -> None:
         project_root=project_root,
         model_name=config.model_name,
     )
+    tensorboard_log_dir = experiment.experiment_dir / "tensorboard"
+    writer = SummaryWriter(tensorboard_log_dir)
 
     dataset = LunaDataset(
         candidates_path=candidates_path,
@@ -160,6 +163,11 @@ def main() -> None:
             val_accuracy=val_accuracy,
             learning_rate=current_learning_rate,
         )
+        writer.add_scalar("Loss/train", train_loss, epoch)
+        writer.add_scalar("Loss/validation", val_loss, epoch)
+        writer.add_scalar("Accuracy/train", train_accuracy, epoch)
+        writer.add_scalar("Accuracy/validation", val_accuracy, epoch)
+        writer.add_scalar("LearningRate", current_learning_rate, epoch)
 
         print("Epoch:", epoch + 1)
         print("Train loss:", train_loss)
@@ -173,6 +181,8 @@ def main() -> None:
         if early_stopping.should_stop(val_loss):
             print("Early stopping triggered.")
             break
+
+    writer.close()
 
     history_path = history.save_json(experiment.metrics_dir / "training_history.json")
     plot_path = history.save_plot(experiment.figures_dir / "training_history.png")
@@ -195,6 +205,7 @@ def main() -> None:
     print("Saved history:", history_path)
     print("Saved plot:", plot_path)
     print("Saved benchmark:", benchmark_path)
+    print("TensorBoard log directory:", tensorboard_log_dir)
 
 
 if __name__ == "__main__":
