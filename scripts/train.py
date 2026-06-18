@@ -14,6 +14,7 @@ from src.config.train_config import TrainConfig
 from src.data.luna_dataset import LunaDataset
 from src.engine.benchmark import BenchmarkResult
 from src.engine.checkpoint import CheckpointManager
+from src.engine.confusion_matrix import save_confusion_matrix_json
 from src.engine.early_stopping import EarlyStopping
 from src.engine.experiment import ExperimentManager
 from src.engine.history import TrainingHistory
@@ -185,6 +186,10 @@ def main() -> None:
     writer.close()
 
     history_path = history.save_json(experiment.metrics_dir / "training_history.json")
+    confusion_matrix_path = save_confusion_matrix_json(
+        confusion_matrix,
+        experiment.metrics_dir / "confusion_matrix.json",
+    )
     plot_path = history.save_plot(experiment.figures_dir / "training_history.png")
     benchmark_result = BenchmarkResult(
         model_name=config.model_name,
@@ -203,6 +208,7 @@ def main() -> None:
     print("Experiment directory:", experiment.experiment_dir)
     print("Training history:", history.to_dict())
     print("Saved history:", history_path)
+    print("Saved confusion matrix:", confusion_matrix_path)
     print("Saved plot:", plot_path)
     print("Saved benchmark:", benchmark_path)
     print("TensorBoard log directory:", tensorboard_log_dir)
