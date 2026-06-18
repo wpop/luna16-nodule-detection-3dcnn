@@ -3,6 +3,7 @@ Predict a class for a single 3D NumPy patch.
 """
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +36,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("outputs/predictions/prediction.json"),
+    )
 
     return parser.parse_args()
 
@@ -90,7 +96,22 @@ def main() -> None:
         logits = model(patch)
 
     prediction = predict_from_logits(logits)
+    output = {
+        "model_name": args.model_name,
+        "checkpoint": str(args.checkpoint),
+        "input": str(args.input),
+        "predicted_class": prediction["predicted_class"],
+        "confidence": prediction["confidence"],
+        "positive_probability": prediction["positive_probability"],
+    }
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+
+    with args.output.open("w", encoding="utf-8") as output_file:
+        json.dump(output, output_file)
+
     print(prediction)
+    print("Saved prediction:", args.output)
 
 
 if __name__ == "__main__":
