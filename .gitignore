@@ -120,6 +120,9 @@ outputs/model_comparison.md
 # Generated prediction outputs
 outputs/predictions/
 
+# Generated ONNX models
+outputs/onnx/
+
 # ==========================================================
 # Temporary files
 # ==========================================================
