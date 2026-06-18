@@ -215,6 +215,10 @@ def main() -> None:
         train_accuracy=history.train_accuracy[-1],
         val_accuracy=history.val_accuracy[-1],
         learning_rate=history.learning_rate[-1],
+        precision=classification_metrics["precision"],
+        recall=classification_metrics["recall"],
+        specificity=classification_metrics["specificity"],
+        f1_score=classification_metrics["f1_score"],
     )
     benchmark_path = benchmark_result.save_json(
         experiment.results_dir / "benchmark.json"

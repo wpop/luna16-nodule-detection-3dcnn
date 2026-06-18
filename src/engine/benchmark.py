@@ -21,6 +21,10 @@ class BenchmarkResult:
     train_accuracy: float
     val_accuracy: float
     learning_rate: float
+    precision: float
+    recall: float
+    specificity: float
+    f1_score: float
 
     def to_dict(self) -> dict[str, str | int | float]:
         """

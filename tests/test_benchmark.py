@@ -14,6 +14,10 @@ def test_benchmark_result_save_json(tmp_path: Path):
         train_accuracy=0.8,
         val_accuracy=0.9,
         learning_rate=0.001,
+        precision=0.7,
+        recall=0.6,
+        specificity=0.95,
+        f1_score=0.64,
     )
     output_path = tmp_path / "results_json" / "baseline_benchmark.json"
 
