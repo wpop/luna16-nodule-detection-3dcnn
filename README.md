@@ -8,6 +8,16 @@ excitation variants, and a small 3D Vision Transformer.
 The project is designed as a modular research framework for experimenting with
 modern 3D deep learning architectures for medical image analysis.
 
+## Highlights
+
+- 🫁 Lung nodule classification on the LUNA16 dataset
+- 🧠 Multiple 3D CNN architectures and a 3D Vision Transformer (ViT3D)
+- 📊 ROC curve, AUC, confusion matrix, and benchmark comparison
+- 🔬 Interactive Streamlit research demo
+- 📦 ONNX export for deployment
+- PyTorch training with optional CUDA acceleration
+- ✅ 55 automated tests
+
 The LUNA16 dataset is not included in this repository. Place the dataset under
 the expected `data/raw/LUNA16` layout before running training.
 
