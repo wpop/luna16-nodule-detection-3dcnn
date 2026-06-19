@@ -18,6 +18,36 @@ modern 3D deep learning architectures for medical image analysis.
 - PyTorch training with optional CUDA acceleration
 - ✅ 55 automated tests
 
+## Topics
+
+`medical-imaging` `deep-learning` `pytorch` `computer-vision` `lung-nodule` `luna16` `3d-cnn` `vision-transformer` `streamlit` `onnx`
+
+## Architecture
+
+```text
+LUNA16 CT Scan
+       │
+       ▼
+3D Patch Extraction (64×64×64)
+       │
+       ▼
+3D CNN / ViT3D
+       │
+       ├──────────────┐
+       ▼              ▼
+Prediction      Evaluation
+       │              │
+       │              ├── ROC / AUC
+       │              ├── Confusion Matrix
+       │              └── Benchmark
+       │
+       ├── Confidence
+       ├── Positive Probability
+       └── ONNX Export
+```
+
+The project provides an end-to-end research pipeline from 3D CT patch extraction through model training, evaluation, deployment, and interactive inference.
+
 The LUNA16 dataset is not included in this repository. Place the dataset under
 the expected `data/raw/LUNA16` layout before running training.
 
