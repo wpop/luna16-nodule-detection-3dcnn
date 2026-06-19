@@ -199,17 +199,53 @@ def render_prediction_tab(
                 st.error(str(error))
                 return
 
-            if prediction["predicted_class"] == 0:
-                st.success("🟢 Benign")
-            else:
-                st.error("🔴 Suspicious nodule")
+            device_name = "CUDA" if torch.cuda.is_available() else "CPU"
+            system_information = [
+                "**System Information**",
+                "",
+                f"**Model:** {model_name}",
+                "",
+                f"**Checkpoint:** {checkpoint_path.name}",
+                "",
+                f"**Device:** {device_name}",
+            ]
 
-            st.metric("Confidence", f"{prediction['confidence'] * 100.0:.2f} %")
-            st.metric(
-                "Positive probability",
-                f"{prediction['positive_probability'] * 100.0:.2f} %",
+            if torch.cuda.is_available():
+                system_information.extend(
+                    ["", f"**GPU:** {torch.cuda.get_device_name(0)}"]
+                )
+
+            st.info("\n".join(system_information))
+
+            st.subheader("Prediction Result")
+
+            if prediction["predicted_class"] == 0:
+                st.success("🟢 Benign Nodule")
+                st.caption(
+                    "The model predicts that this CT patch is more likely to "
+                    "represent a benign finding."
+                )
+            else:
+                st.error("🔴 Suspicious Nodule")
+                st.caption(
+                    "The model predicts that this CT patch may contain a "
+                    "pulmonary nodule requiring further clinical review."
+                )
+
+            st.warning(
+                "This prediction is intended for research purposes only and "
+                "must not be used as a clinical diagnosis."
             )
-            st.metric("Inference time (milliseconds)", f"{inference_time_ms:.2f}")
+
+            st.subheader("Confidence")
+            st.progress(float(prediction["confidence"]))
+            st.caption(f"{prediction['confidence'] * 100.0:.2f} %")
+
+            st.subheader("Positive probability")
+            st.progress(float(prediction["positive_probability"]))
+            st.caption(f"{prediction['positive_probability'] * 100.0:.2f} %")
+
+            st.metric("Inference time", f"{inference_time_ms:.2f} ms")
 
             with st.expander("Prediction JSON"):
                 st.json(prediction)

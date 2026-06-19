@@ -167,6 +167,14 @@ The demo provides:
 - Confidence and probability scores
 - ROC curve and confusion matrix visualization
 
+## Docker
+
+Build the CUDA-enabled Docker image:
+
+```bash
+docker build -t luna16-streamlit:latest .
+```
+
 ## Tests
 
 Run the test suite with:

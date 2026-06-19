@@ -1,0 +1,17 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+data/
+outputs/
+notebooks/
+docs/
+.venv/
+venv/
+pytorch-env/
+*.pth
+*.onnx
+.gitignore
+.vscode/
+.idea/
+*.log
