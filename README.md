@@ -99,6 +99,34 @@ outputs/benchmark_summary.csv
 outputs/benchmark_summary.md
 ```
 
+## Streamlit Demo
+
+### Demo
+
+![Streamlit Demo](docs/images/streamlit_demo.png)
+
+Install dependencies and start the local demo app:
+
+```bash
+pip install -r requirements.txt
+streamlit run app/streamlit_app.py
+```
+
+Open the app at:
+
+```text
+http://localhost:8501
+```
+
+The demo provides:
+
+- Built-in positive and negative example patches
+- Custom `.npy` patch upload
+- Model and checkpoint selection
+- Single-patch inference
+- Confidence and probability scores
+- ROC curve and confusion matrix visualization
+
 ## Tests
 
 Run the test suite with:
